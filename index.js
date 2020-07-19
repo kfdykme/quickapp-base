@@ -20,13 +20,22 @@ let isArgOk = mustArgs.filter(i => {
 console.info('isArgOk: ' + isArgOk)
 console.info('\n\n')
 
-let fileUx = './base.ux'
-let fileLess = './base.less'
+console.info('read config')
+
+let fileConfig = './qbase.config.json'
+let fileConfigContent = fs.readFileSync(fileConfig) + ''
+let jsonConfig = JSON.parse(fileConfigContent)
+
+console.info('read config :' , jsonConfig)
+
+
+let fileUx = jsonConfig.basePath + '/base.ux'
+let fileLess = jsonConfig.basePath + '/base.less'
 
 let fileContentUx = fs.readFileSync(fileUx) + ''
 let fileContentLess= fs.readFileSync(fileLess) + ''
 fileContentUx = fileContentUx.replace('\(\(pageName\)\)', res['n'])
+console.info(res)
 
-
-fs.writeFileSync(res.t + res.n + '.ux',fileContentUx)
-fs.writeFileSync(res.t + res.n + '.less', fileContentLess)
+fs.writeFileSync(jsonConfig.targetBasePath + '/' + res.t + res.n + '.ux',fileContentUx)
+fs.writeFileSync(jsonConfig.targetBasePath + '/' + res.t + res.n + '.less', fileContentLess)
