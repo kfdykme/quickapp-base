@@ -28,14 +28,66 @@ let jsonConfig = JSON.parse(fileConfigContent)
 
 console.info('read config :' , jsonConfig)
 
+console.info('read manifest.json')
+let fileManifest = jsonConfig.targetBasePath + '/' + 'manifest.json'
+let fileManifestContent = fs.readFileSync(fileManifest)
+let jsonManifest = JSON.parse(fileManifestContent)
+console.info('read manifest.json', jsonManifest)
 
 let fileUx = jsonConfig.basePath + '/base.ux'
 let fileLess = jsonConfig.basePath + '/base.less'
 
 let fileContentUx = fs.readFileSync(fileUx) + ''
 let fileContentLess= fs.readFileSync(fileLess) + ''
-fileContentUx = fileContentUx.replace('\(\(pageName\)\)', res['n'])
+fileContentUx = fileContentUx.replace(/\(\(pageName\)\)/g, res['n'])
+
 console.info(res)
 
-fs.writeFileSync(jsonConfig.targetBasePath + '/' + res.t + res.n + '.ux',fileContentUx)
-fs.writeFileSync(jsonConfig.targetBasePath + '/' + res.t + res.n + '.less', fileContentLess)
+let targetPath = jsonConfig.targetBasePath + '/' + res.t
+let nowExistDir = ''
+
+console.info('targetPath', targetPath)
+targetPath.split('/').forEach((item, i) => {
+  nowExistDir +=  item + "/"
+  console.info('for ',nowExistDir)
+  if (!fs.existsSync(nowExistDir)) {
+    console.info('is not exist: ', nowExistDir)
+     fs.mkdirSync(nowExistDir);
+     console.info('craete ', nowExistDir)
+ }
+});
+
+
+console.info('write file to ' + targetPath)
+
+let prePath = targetPath.split('/').filter(i => {
+  return i != '.' && i != 'src' && i != ''
+}).map(i => {
+  console.info('tarns ', i , 'to ..', )
+  return '..'
+}).join('/')
+
+targetPath +=  "/" + res.n
+
+fileContentUx = fileContentUx.replace(/'@\//g,"'" + prePath +"/")
+fileContentLess = fileContentLess.replace(/'@\//g,"'" + prePath +"/")
+
+fs.writeFileSync(targetPath + '.ux',fileContentUx)
+fs.writeFileSync(targetPath + '.less', fileContentLess)
+console.info('write file finished')
+
+console.info('update manifest')
+
+jsonManifest.router.pages[res.t] = {
+  "component" : res.n
+}
+jsonManifest.display.pages[res.t] = {
+  "Demo": {
+    "titleBarText": "示例页",
+    "menu": false
+  },
+}
+
+fileManifestContent = JSON.stringify(jsonManifest, null, 4)
+
+fs.writeFileSync(fileManifest, fileManifestContent)

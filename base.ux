@@ -1,11 +1,13 @@
 <template>
   <!-- template里只能有一个根节点 -->
-  <div class="((pageName))-page">
+  <div class="((pageName))-page page-containor">
     <text class="title">欢迎</text>
   </div>
 </template>
 
-<style lang="less" src="./((pageName)).less"></style>
+<style lang="less" src="./((pageName)).less">
+
+</style>
 
 <script>
 import router from '@system.router'
